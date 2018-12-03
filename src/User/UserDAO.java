@@ -189,6 +189,58 @@ public class UserDAO {
 		}
 		return dto;
 	}
+	
+	public UserDTO getUser_byTicketNo(int ticket_no) {
+		UserDTO dto = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet r = null;
+
+		try {
+			conn = getConnection();
+
+			String sql = "SELECT client_id, client_password,client_name,client_birth,client_address,client_number,client_point,client_purchase_count "
+					+ "FROM client WHERE client_id in (select client_id from ticketing where ticket_number = ? )";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, Integer.toString(ticket_no));
+			r = pstmt.executeQuery();
+
+			if (r.next()) {
+				String client_id = r.getString("client_id");
+				String client_password = r.getString("client_password");
+				String client_name = r.getString("client_name");
+				String client_birth = r.getString("client_birth");
+				String client_address = r.getString("client_address");
+				String client_number = r.getString("client_number");
+				int client_point = r.getInt("client_point");
+				int client_purchase_count = r.getInt("client_purchase_count");
+
+				dto = new UserDTO(client_id, client_password, client_name, client_birth, client_address, client_number,
+						client_point, client_purchase_count);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (r != null)
+				try {
+					r.close();
+				} catch (SQLException ex) {
+				}
+			if (pstmt != null)
+				try {
+					pstmt.close();
+				} catch (SQLException ex) {
+				}
+			if (conn != null)
+				try {
+					conn.close();
+				} catch (SQLException ex) {
+				}
+		}
+		return dto;
+	}
+	
 
 	public boolean updateUser(UserDTO dto, String id) {
 		Connection conn = null;

@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import Auditorium.AuditoriumManagement;
 import Client.ClientManagement;
+import Payment.PaymentProc;
 import movie.MovieManagement;
 import movie.MovieProc;
 import theater.TheaterManagement;
@@ -115,6 +116,7 @@ public class UserManagement {
 		UserProc mm = new UserProc();
 		MovieProc mp = new MovieProc();
 		TicketingProc tp = new TicketingProc();
+		PaymentProc pp = new PaymentProc();
 		boolean run_User = true;
 
 		while (run_User) {
@@ -160,6 +162,8 @@ public class UserManagement {
 				tp.insertTicketing(logIn_id);
 				break;
 			case 5:
+				pp.insertPayment(logIn_id);
+				break;
 			case 6:
 				tp.printTicket(logIn_id);
 				break;

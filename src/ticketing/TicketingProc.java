@@ -62,7 +62,7 @@ public class TicketingProc {
                //위 함수에서 좌석 수도 보여주는 거 나중에 구현
                System.out.print("▶ 선택할 상영 시간 : ");
                String show_time = reInput(scn);
-               System.out.print("▶예매할 인원 수 : ");
+               System.out.print("▶ 예매할 인원 수 : ");
                int num = scn.nextInt();
                
                Time_tableDAO tt_dao = new Time_tableDAO();
@@ -86,14 +86,6 @@ public class TicketingProc {
             }
          }
       }
-
-      /*
-       * TicketingDTO dto = new TicketingDTO(client_id, m_name, num,); boolean
-       * r = dao.insertTicketing(dto);
-       * 
-       * if(r){ System.out.println("영화관 등록이 정상적으로 완료되었습니다."); }else{
-       * System.out.println("영화관 등록이 정상적으로 이루지지 않았습니다."); }
-       */
    }
 
    // 저장된 영화관 목록 보기
@@ -229,6 +221,29 @@ public class TicketingProc {
       System.out.println("====================================================================총 "
             + ((list == null) ? "0" : list.size()) + "개=\n");
    }
+   
+   public void showTicketingList_for_pay(String c_id) {
+
+		List<TicketingDTO> list = dao.getTicketingList_for_pay(c_id);
+
+		System.out.println("                             Ticketing List");
+		System.out.println("============================================================================");
+		if (list != null && list.size() > 0) {
+			System.out.println("reg.No\t  예매번호 \t\t고객ID\t\t영화ID\t\t영화관 이름\t\t인원");
+			System.out.println("============================================================================");
+
+			for (TicketingDTO dto : list) {
+				System.out.println("\t" + dto.getTicket_number() + "\t\t" + dto.getClient_id() + "\t\t"
+						+ dto.getMovie_id() + "\t\t" + dto.getTheater_name() + "\t\t" + dto.getPeople());
+			}
+
+		} else {
+			System.out.println("저장된 데이터가 없습니다. ");
+		}
+		System.out.println("====================================================================총 "
+				+ ((list == null) ? "0" : list.size()) + "개=\n");
+	}
+
 
    public String findMaxNumber() {
 
