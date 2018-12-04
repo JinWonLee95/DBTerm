@@ -7,6 +7,8 @@ import java.util.List;
 public class MovieDAO {
 
 	private static MovieDAO instance = new MovieDAO();
+	Connection conn = null;
+	PreparedStatement pstmt = null;
 
 	public static MovieDAO getInstance() {
 		return instance;
@@ -30,8 +32,7 @@ public class MovieDAO {
 
 	// 영화 등록하기
 	public boolean insertMovie(MovieDTO dto) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+
 		boolean result = false;
 
 		try {
@@ -71,8 +72,6 @@ public class MovieDAO {
 	// 영화이름에 해당하는 영화 정보 보기
 	public MovieDTO getMovie(String m_id) {
 		MovieDTO dto = null;
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet r = null;
 
 		try {
@@ -123,8 +122,7 @@ public class MovieDAO {
 	// 저장된 회원 목록 보기
 	public List<MovieDTO> getMovieList_for_manager() {
 		List<MovieDTO> list = new ArrayList<MovieDTO>();
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+
 		ResultSet r = null;
 
 		try {
@@ -173,8 +171,7 @@ public class MovieDAO {
 	public List<MovieDTO> getMovieList_for_user() {
 		List<MovieDTO> list = new ArrayList<MovieDTO>();
 		ArrayList<String> list2 = new ArrayList<String>();
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+
 		ResultSet r = null;
 
 		try {
@@ -231,8 +228,7 @@ public class MovieDAO {
 
 	// 회원 수정
 	public boolean updateMovie(MovieDTO dto, String m_id) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+
 		boolean result = false;
 
 		try {
@@ -273,17 +269,24 @@ public class MovieDAO {
 
 	// 회원 삭제
 	public boolean deleteMovie(String m_id) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+
+		String sql = null;
 		boolean result = false;
 		try {
 			conn = getConnection();
 
-			String sql = "DELETE FROM movie WHERE movie_id = ?";
+			sql = "delete from time_table where auditorium_name in(select auditorium_name from auditorium where theater_name in (select theater_name from theater where theater_name in (select theater_name from movie where movie_id = ?)))";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, m_id);
+			int r1 = pstmt.executeUpdate();
+			
+			sql = "DELETE FROM movie WHERE movie_id = ?";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, m_id);
 			int r = pstmt.executeUpdate();
-			if (r > 0) {
+			
+			
+			if (r > 0 && r1 >0) {
 				result = true;
 			}
 		} catch (Exception e) {

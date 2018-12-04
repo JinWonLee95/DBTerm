@@ -129,7 +129,8 @@ public class UserManagement {
 			System.out.println("5.영화 결제");
 			System.out.println("6.예약 현황 확인");
 			System.out.println("7.예약 취소");
-			System.out.println("8.로그아웃");
+			System.out.println("8.티켓 발권");
+			System.out.println("9.로그아웃");
 			System.out.println("============== aaaaaaaaaaaaaaaaaa ==============");
 			System.out.print("메뉴를 입력하세요 : ");
 
@@ -137,7 +138,7 @@ public class UserManagement {
 			int num = 0;
 			try {
 				num = scn.nextInt();
-				if (!(num > 0 && num < 9)) { // 1~7 외의 숫자가 입력되면 예외 강제 발생
+				if (!(num > 0 && num < 10)) { // 1~7 외의 숫자가 입력되면 예외 강제 발생
 					throw new InputMismatchException();
 				}
 			} catch (InputMismatchException e) {
@@ -172,6 +173,10 @@ public class UserManagement {
 				tp.cancelArrangement();
 				break;
 			case 8:
+				tp.printTicket(logIn_id);
+				tp.getPrintTicket(logIn_id);
+				break;
+			case 9:
 				System.out.println("로그아웃 되었습니다.");
 				run_User = false;
 			}

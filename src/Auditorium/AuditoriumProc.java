@@ -1,4 +1,5 @@
 package Auditorium;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,11 +17,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-
 public class AuditoriumProc {
 
 	AuditoriumDAO dao;
 	String a = "";
+	Scanner scn = new Scanner(System.in);
 
 	public AuditoriumProc() {
 		dao = new AuditoriumDAO();
@@ -28,8 +29,6 @@ public class AuditoriumProc {
 
 	// 영화관 등록 처리
 	public void insertAuditorium(String t_name) {
-
-		Scanner scn = new Scanner(System.in);
 
 		System.out.println("상영관 정보를 입력해주세요.");
 		System.out.print("▶이름 : ");
@@ -55,6 +54,7 @@ public class AuditoriumProc {
 
 		System.out.println("                             Auditorium List");
 		System.out.println("============================================================================");
+
 		if (list != null && list.size() > 0) {
 			System.out.println("reg.No\t  상영관 이름 \t\t좌석 수\t\t영화관 이름");
 			System.out.println("============================================================================");
@@ -67,8 +67,10 @@ public class AuditoriumProc {
 		} else {
 			System.out.println("저장된 데이터가 없습니다. ");
 		}
+
 		System.out.println("====================================================================총 "
 				+ ((list == null) ? "0" : list.size()) + "개=\n");
+
 	}
 
 	public void showAuditoriumListByTheater(String t_name) {
@@ -92,12 +94,10 @@ public class AuditoriumProc {
 		System.out.println("====================================================================총 "
 				+ ((list == null) ? "0" : list.size()) + "개=\n");
 	}
-	
-	
+
 	// 영화관 삭제
 	public void deleteAuditorium() {
 
-		Scanner scn = new Scanner(System.in);
 		System.out.print("삭제할 상영관의 상영관 이름을 입력해주세요 : ");
 		String a_name = scn.nextLine();
 		AuditoriumDTO dto = dao.getAuditorium(a_name);

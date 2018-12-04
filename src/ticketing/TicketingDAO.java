@@ -12,7 +12,9 @@ public class TicketingDAO {
 
 	private static TicketingDAO instance = new TicketingDAO();
 	Connection conn = null;
+	Connection conn2 = null;
 	PreparedStatement pstmt = null;
+	PreparedStatement pstmt2 = null;
 
 	public static TicketingDAO getInstance() {
 		return instance;
@@ -34,21 +36,28 @@ public class TicketingDAO {
 	}
 
 	// 영화 등록하기
-	public boolean insertTicketing(TicketingDTO dto) {
+	public boolean insertTicketing(TicketingDTO dto, String client_id) {
 		boolean result = false;
 
 		try {
 			conn = getConnection();
+			conn2 = getConnection();
 
-			String sql = "insert into ticketing VALUES (?,?,?,?,?)";
+			String sql = "insert into ticketing VALUES (?,?,?,?,?);";
+			String sql2 = "UPDATE movie SET movie_reserve_count = movie_reserve_count + 1 "
+					+ "where movie_id in (select movie_id from ticketing where " + "client_id = ?)";
 			pstmt = conn.prepareStatement(sql);
+			pstmt2 = conn2.prepareStatement(sql2);
 			pstmt.setString(1, dto.getClient_id());
 			pstmt.setString(3, dto.getMovie_id());
 			pstmt.setString(5, Integer.toString(dto.getPeople()));
 			pstmt.setString(2, Integer.toString(dto.getTicket_number()));
 			pstmt.setString(4, dto.getTheater_name());
+			pstmt2.setString(1, client_id);
+
 			int r = pstmt.executeUpdate();
-			if (r > 0) {
+			int r2 = pstmt2.executeUpdate();
+			if (r > 0 && r2 > 0) {
 				result = true;
 			}
 		} catch (Exception e) {
@@ -62,6 +71,16 @@ public class TicketingDAO {
 			if (conn != null)
 				try {
 					conn.close();
+				} catch (SQLException sqle) {
+				}
+			if (pstmt2 != null)
+				try {
+					pstmt2.close();
+				} catch (SQLException sqle) {
+				}
+			if (conn2 != null)
+				try {
+					conn2.close();
 				} catch (SQLException sqle) {
 				}
 		}
@@ -137,24 +156,7 @@ public class TicketingDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
 		}
-
 		return sum_number;
 	}
 
@@ -183,24 +185,7 @@ public class TicketingDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
 		}
-
 		return list;
 	}
 
@@ -228,23 +213,7 @@ public class TicketingDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
-		}
+		} 
 
 		return dto;
 	}
@@ -273,24 +242,7 @@ public class TicketingDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
-		}
-
+		} 
 		return list;
 	}
 
@@ -319,24 +271,7 @@ public class TicketingDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
-		}
-
+		} 
 		return dto;
 	}
 
@@ -413,55 +348,9 @@ public class TicketingDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
 		}
 
 		return list;
-	}
-
-	// 예매 내역 삭제
-	public boolean deleteTicketing(int t_number) {
-		boolean result = false;
-		try {
-			conn = getConnection();
-
-			String sql = "DELETE FROM ticketing WHERE ticket_number = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, Integer.toString(t_number));
-			int r = pstmt.executeUpdate();
-			if (r > 0) {
-				result = true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException sqle) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException sqle) {
-				}
-		}
-		return result;
 	}
 
 	// 예매 현황 출력
@@ -469,7 +358,7 @@ public class TicketingDAO {
 
 		try {
 			conn = getConnection();
-			String sql = "select * from ticketing where client_id=?";
+			String sql = "select * from ticketing where client_id =?";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, id);
 			ResultSet rs = pstmt.executeQuery();
@@ -478,9 +367,10 @@ public class TicketingDAO {
 			while (rs.next()) {
 				str += rs.getString("ticketing.client_id") + "\t\t" + rs.getString("ticketing.ticket_number") + "\t\t"
 						+ rs.getString("ticketing.movie_id") + "\t\t" + rs.getString("ticketing.theater_name") + "\t\t"
-						+ rs.getString("ticketing.people");
+						+ rs.getString("ticketing.people")+"\n";
 			}
 			System.out.println(str + "\n");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -488,37 +378,109 @@ public class TicketingDAO {
 
 	public void deleteArrange(int ticket_No) {
 		try {
+
+			System.out.println("들어감");
 			conn = getConnection();
+			// 회원 예매 횟수 --
+			String sql = "update client set client_purchase_count = client_purchase_count-1 where client_id in ( select client_id from ticketing where ticket_number ="
+					+ ticket_No + ") ";
+			pstmt = conn.prepareStatement(sql);
+			int r1 = pstmt.executeUpdate();
+
+			// 영화 예매 횟수 --
+			sql = "update movie set movie_reserve_count = movie_reserve_count-1 where movie_id in ( select movie_id from ticketing where ticket_number = "
+					+ ticket_No + ") ";
+			pstmt = conn.prepareStatement(sql);
+			int r2 = pstmt.executeUpdate();
+
+			// 회원 예매 내역에서 삭제
+			sql = "delete from purchased where client_id in (select client_id from ticketing where ticket_number = "
+					+ ticket_No
+					+ ") and movie_name in (select movie_name from movie where movie_id in ( select movie_id from ticketing where ticket_number = "
+					+ ticket_No + "))";
+			pstmt = conn.prepareStatement(sql);
+			int r3 = pstmt.executeUpdate();
+
+			// 결제에서 삭제
+			sql = "delete from payment where ticket_no =" + ticket_No;
+			pstmt = conn.prepareStatement(sql);
+			int r4 = pstmt.executeUpdate();
+
+			// 예매 현황에서 삭제
+			sql = "delete from ticketing where ticket_number =" + ticket_No;
+			pstmt = conn.prepareStatement(sql);
+			int r5 = pstmt.executeUpdate();
+
+		} catch (Exception e) {
+
+		}
+	}
+
+	// 영화표 발권
+	public void getPrintTicket(int t_no) {
+		try {
 			String sql;
-			if (isPayed(ticket_No)) {
-				// 회원 예매 횟수 --
-				sql = "update client set client_purchase_count = client_purchase_count-1 where client_id in ( select client_id from ticketing where ticket_number = "
-						+ ticket_No + ") ";
+			if (isPayed(t_no)) {
+				conn = getConnection();
+				sql = "select * from ticketing, payment as ticket where ticketing.ticket_number = ticket.ticket_no and ticketing.ticket_number =?;";
 				pstmt = conn.prepareStatement(sql);
-				pstmt.executeUpdate();
-
-				// 영화 예매 횟수 --
-				sql = "update movie set movie_reserve_count = movie_reserve_count-1 where movie_id in ( select movie_id from ticketing where ticket_number = "
-						+ ticket_No + ") ";
-				pstmt = conn.prepareStatement(sql);
-				pstmt.executeUpdate();
-
-				// 회원 예매 내역에서 삭제
-				sql = "delete from purchased where client_id in (select client_id from ticketing where ticket_number = "
-						+ ticket_No
-						+ ") and movie_name in (select movie_name from movie where movie_id in ( select movie_id from ticketing where ticket_number = "
-						+ ticket_No + "))";
-
-				// 예매 현황에서 삭제
-				sql = "delete from ticketing where ticket_number = " + ticket_No;
-				pstmt = conn.prepareStatement(sql);
-				pstmt.executeUpdate();
-
+				pstmt.setInt(1, t_no);
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()) {
+					String str = " 예매 번호 : " + rs.getInt("ticket_number") + "\n 무비 ID: " + rs.getString("movie_id")
+							+ "\n 영화관 이름 : " + rs.getString("theater_name") + "\n 관람 인원: " + rs.getInt("people")
+							+ "\n 가격 : " + rs.getInt("ticket.price") + "\n";
+					System.out.println("==============================티켓 정보입니다.=========================");
+					System.out.println(str);
+				}
+			}else {
+				System.out.println("아직 결제가 되지 않은 티켓입니다.");
 			}
 		} catch (Exception e) {
 
 		}
 	}
+	
+	public int makePayment_no() {
+	      Connection conn = null;
+	      PreparedStatement pstmt = null;
+	      ResultSet r = null;
+	      int payment_no = -1;
+
+	      while (true) {
+	         double randomValue = Math.random();
+	         payment_no = (int) (randomValue * 899999) + 100001;
+	         int success = -1;
+	         try {
+	            conn = getConnection();
+
+	            String sql = "select exists (select * from payment where payment_no = ?) as success";
+	            pstmt = conn.prepareStatement(sql);
+	            pstmt.setString(1, Integer.toString(payment_no));
+	            r = pstmt.executeQuery();
+	            if (r.next()) {
+	               success = r.getInt("success");
+	            }
+	            if (success == 0) {
+	               break;
+	            }
+	         } catch (Exception e) {
+	            e.printStackTrace();
+	         } finally {
+	            if (pstmt != null)
+	               try {
+	                  pstmt.close();
+	               } catch (SQLException ex) {
+	               }
+	            if (conn != null)
+	               try {
+	                  conn.close();
+	               } catch (SQLException ex) {
+	               }
+	         }
+	      }
+	      return payment_no;
+	   }
 
 	public boolean isPayed(int ticket_No) {
 		boolean isPayed = false;
@@ -526,16 +488,30 @@ public class TicketingDAO {
 			conn = getConnection();
 			String sql;
 
-			sql = "select isPayed from payment where ticket_no = ?";
+			sql = "SELECT isPayed FROM payment WHERE ticket_no =?";
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, Integer.toString(ticket_No));
+			pstmt.setInt(1, ticket_No);
 			ResultSet rs = pstmt.executeQuery();
 
-			if (rs.getString("payment.isPayed").equals("1")) {
-				isPayed = true;
+			while (rs.next()) {
+				if (rs.getInt("payment.isPayed") == 1) {
+					isPayed = true;
+				}
 			}
+
 		} catch (Exception e) {
 
+		} finally {
+			if (pstmt != null)
+				try {
+					pstmt.close();
+				} catch (SQLException sqle) {
+				}
+			if (conn != null)
+				try {
+					conn.close();
+				} catch (SQLException sqle) {
+				}
 		}
 		return isPayed;
 	}
