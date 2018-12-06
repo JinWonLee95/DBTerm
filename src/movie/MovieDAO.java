@@ -9,6 +9,7 @@ public class MovieDAO {
 	private static MovieDAO instance = new MovieDAO();
 	Connection conn = null;
 	PreparedStatement pstmt = null;
+	PreparedStatement pstmt2 = null;
 
 	public static MovieDAO getInstance() {
 		return instance;
@@ -40,6 +41,7 @@ public class MovieDAO {
 
 			String sql = "insert into movie VALUES (?,?,?,?,?,?,?,?)";
 			pstmt = conn.prepareStatement(sql);
+
 			pstmt.setString(1, dto.getMovie_id());
 			pstmt.setString(2, dto.getMovie_name());
 			pstmt.setString(3, dto.getMovie_director());
@@ -48,23 +50,14 @@ public class MovieDAO {
 			pstmt.setString(6, dto.getMovie_info());
 			pstmt.setString(7, Integer.toString(dto.getMovie_reserve_count()));
 			pstmt.setString(8, dto.getTheater_name());
+
 			int r = pstmt.executeUpdate();
 			if (r > 0) {
 				result = true;
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException sqle) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException sqle) {
-				}
 		}
 		return result;
 	}
@@ -191,14 +184,13 @@ public class MovieDAO {
 				int movie_reserve_count = r.getInt("movie_reserve_count");
 				String theater_name = r.getString("theater_name");
 
-				MovieDTO m_dto = new MovieDTO(movie_id, movie_name, movie_director, movie_actor, movie_rating, movie_info,
-						movie_reserve_count, theater_name);
-				if(list2.contains(movie_name)){
+				MovieDTO m_dto = new MovieDTO(movie_id, movie_name, movie_director, movie_actor, movie_rating,
+						movie_info, movie_reserve_count, theater_name);
+				if (list2.contains(movie_name)) {
 					int a = list2.indexOf(movie_name);
 					int sum = list.get(a).getMovie_reserve_count() + movie_reserve_count;
 					list.get(a).setMovie_reserve_count(sum);
-				}
-				else {
+				} else {
 					list.add(m_dto);
 					list2.add(movie_name);
 				}
@@ -267,7 +259,30 @@ public class MovieDAO {
 		return result;
 	}
 
-	// 회원 삭제
+	public boolean confirmMovie(String m_id) {
+		ResultSet r = null;
+
+		try {
+			conn = getConnection();
+
+			String sql = "select exists (select * from movie where movie_id = ?) as success";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, m_id);
+			r = pstmt.executeQuery();
+
+			r.next();
+			if (r.getInt(1) == 1) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 	public boolean deleteMovie(String m_id) {
 
 		String sql = null;
@@ -279,29 +294,17 @@ public class MovieDAO {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, m_id);
 			int r1 = pstmt.executeUpdate();
-			
+
 			sql = "DELETE FROM movie WHERE movie_id = ?";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, m_id);
 			int r = pstmt.executeUpdate();
-			
-			
-			if (r > 0 && r1 >0) {
+
+			if (r > 0 && r1 > 0) {
 				result = true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException sqle) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException sqle) {
-				}
 		}
 		return result;
 	}

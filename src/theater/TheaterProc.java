@@ -29,13 +29,14 @@ public class TheaterProc {
 		AuditoriumProc ap = new AuditoriumProc();
 		System.out.println("영화관 정보를 입력해주세요.");
 		System.out.print("▶이름 : ");
-		String name = reInput(scn);
+		String name = reInput();
 		System.out.print("▶주소 : ");
-		String address = reInput(scn);
+		String address = reInput();
 		System.out.print("▶전화번호 : ");
-		String number = reInput(scn);
-
+		String number = reInput();
+		
 		TheaterDTO dto = new TheaterDTO(name, address, number);
+		
 		boolean r = dao.insertTheater(dto);
 
 		if (r) {
@@ -112,7 +113,7 @@ public class TheaterProc {
 
 				dto = new TheaterDTO(name, address, number);
 
-				boolean r = dao.updateTheater(dto, t_name);
+				boolean r = dao.updateTheater(dto, t_name, name);
 				if (r) {
 					System.out.println("영화관의 정보가 다음과 같이 수정되었습니다.");
 					System.out.println(dto.getInfo());
@@ -157,8 +158,8 @@ public class TheaterProc {
 	}
 
 	// 공백입력시 재입력
-	public String reInput(Scanner scn) {
-
+	public String reInput() {
+		Scanner scn = new Scanner(System.in);
 		String str = "";
 		while (true) {
 			str = scn.nextLine();

@@ -3,6 +3,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import Time_table.Time_tableProc;
+import theater.TheaterDAO;
 import theater.TheaterManagement;
 import theater.TheaterProc;
 
@@ -13,7 +14,10 @@ public class AuditoriumManagement {
 		
 		AuditoriumProc mm = new AuditoriumProc();
 		Time_tableProc tp = new Time_tableProc();
+		TheaterDAO tdao = new TheaterDAO();
+		
 		boolean run = true;
+		String t_name;
 		
 		while (run) {
 			System.out.println();
@@ -40,9 +44,16 @@ public class AuditoriumManagement {
 				mm.showAuditoriumList();//영화관 목록	
 				break;
 			case 2:
-				new TheaterProc().showTheaterList();
-				System.out.print("상영관을 추가할 영화관 이름을 입력해주세요. : ");
-				String t_name = scn2.nextLine();
+				while (true) {
+					new TheaterProc().showTheaterList();
+					System.out.print("▶ 상영관을 추가할 영화관 이름을 입력해주세요. : ");
+					t_name = scn2.nextLine();
+					if (tdao.confirmTheater(t_name) == true){
+						break;
+					}else{
+						System.out.println("이 영화관은 존재하지 않습니다.");
+					}
+				}
 				mm.insertAuditorium(t_name); //영화관 등록
 				break;
 			case 3:

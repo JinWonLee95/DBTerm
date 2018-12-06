@@ -16,6 +16,7 @@ import Auditorium.AuditoriumDTO;
 import Auditorium.AuditoriumProc;
 import Time_table.Time_tableProc;
 import theater.TheaterDAO;
+import theater.TheaterProc;
 
 public class MovieProc {
 
@@ -30,56 +31,59 @@ public class MovieProc {
 
 		Scanner scn = new Scanner(System.in);
 		AuditoriumProc ap = new AuditoriumProc();
+		TheaterProc thp = new TheaterProc();
 		Time_tableProc tp = new Time_tableProc();
 		TheaterDAO td = new TheaterDAO();
-		boolean rollback = true;
-		String t_name="";
-
-		System.out.println("영화 정보를 입력해주세요.");
-		System.out.print("▶ id : ");
-		String id = reInput(scn);
-		System.out.print("▶ 이름 : ");
-		String m_name = reInput(scn);
-		System.out.print("▶ 감독 : ");
-		String director = reInput(scn);
-		System.out.print("▶ 출연 : ");
-		String actor = reInput(scn);
-		System.out.print("▶ 등급 : ");
-		String rating = reInput(scn);
-		System.out.print("▶ 정보 : ");
-		String info = reInput(scn);
+		String m_id = "";
+		String t_name = "";
+		String a_name = "";
 		
-		while (rollback) {
-			System.out.print("▶ 영화관 이름: ");
-			 t_name = reInput(scn);
-
-			while (true) {
-				ap.showAuditoriumListByTheater(t_name);
-				System.out.println("상영관을 추가하시겠습니까? (Y/N): ");
-
-				if (scn.next().toLowerCase().equals("y")) {
-					new AuditoriumProc().insertAuditorium(t_name);
-				} else {
-//					if (td.countAudi(t_name) < 1) {
-//						System.out.println("상영 가능한 상영관이 없습니다.");
-//					}else {
-//						rollback = false;
-//					}
-					rollback = false;
-					break;
-				}
-				
+		System.out.println("영화 정보를 입력해주세요.");
+		while (true) {
+			System.out.print("▶ 영화 id : ");
+			m_id = reInput();
+			if (dao.confirmMovie(m_id) == true){
+				System.out.println("존재하는 영화 id입니다.");
+			}else{
+				break;
 			}
-			
+		}
+		System.out.print("▶ 이름 : ");
+		String m_name = reInput();
+		System.out.print("▶ 감독 : ");
+		String director = reInput();
+		System.out.print("▶ 출연 : ");
+		String actor = reInput();
+		System.out.print("▶ 등급 : ");
+		String rating = reInput();
+		System.out.print("▶ 정보 : ");
+		String info = reInput();
+		while (true) {
+			thp.showTheaterList();
+			System.out.print("▶ 영화관 이름: ");
+			t_name = reInput();
+			if (td.confirmTheater(t_name) == true){
+				break;
+			}else{
+				System.out.println("이 영화관은 존재하지 않습니다.");
+			}
 		}
 		
-		System.out.print("▶ 상영관 이름: ");
-		String a_name = reInput(scn);
+		while (true) {
+			ap.showAuditoriumListByTheater(t_name);
+			System.out.print("▶ 상영관 이름: ");
+			a_name = reInput();
+			if (ap.confirmAuditoriumListByTheater(t_name, a_name) == true){
+				break;
+			}else{
+				System.out.println("이 상영관은 존재하지 않습니다.");
+			}
+		}
 		if (tp.showTime_tableExist(a_name)) {
 			System.out.println("이 상영관에는 이미 상영하는 영화가 있습니다.");
 		} else {
-			tp.insertTime_table(a_name, id);
-			MovieDTO dto = new MovieDTO(id, m_name, director, actor, rating, info, 0, t_name);
+			tp.insertTime_table(a_name, m_id);
+			MovieDTO dto = new MovieDTO(m_id, m_name, director, actor, rating, info, 0, t_name);
 			boolean r = dao.insertMovie(dto);
 
 			if (r) {
@@ -160,8 +164,7 @@ public class MovieProc {
 			String input = scn.nextLine();
 			if (input.equalsIgnoreCase("y")) {
 				System.out.println("##입력을 하시지않으면 기존의 정보가 그대로 유지됩니다.");
-				System.out.print("▶수정할 id : ");
-				String id = scn.nextLine();
+				String id = "";
 				if (id.trim().equals(""))
 					id = dto.getMovie_id();
 				System.out.print("▶수정할 이름 : ");
@@ -209,7 +212,7 @@ public class MovieProc {
 
 		Scanner scn = new Scanner(System.in);
 		System.out.print("삭제할 영화의 영화 id를 입력해주세요 : ");
-		String m_id = reInput(scn);
+		String m_id = reInput();
 		MovieDTO dto = dao.getMovie(m_id);
 		if (dto != null) {
 			System.out.println(dto.getInfo());
@@ -234,8 +237,8 @@ public class MovieProc {
 	}
 
 	// 공백입력시 재입력
-	public String reInput(Scanner scn) {
-
+	public String reInput() {
+		Scanner scn = new Scanner(System.in);
 		String str = "";
 		while (true) {
 			str = scn.nextLine();

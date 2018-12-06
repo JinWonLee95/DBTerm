@@ -37,17 +37,17 @@ public class UserProc {
 
 		System.out.println("고객의 정보를 입력해주세요.");
 		System.out.print("▶아이디 : ");
-		String client_id = reInput(scn);
+		String client_id = reInput();
 		System.out.print("▶비밀번호 : ");
-		String client_password = reInput(scn);
+		String client_password = reInput();
 		System.out.print("▶이름 : ");
-		String client_name = reInput(scn);
+		String client_name = reInput();
 		System.out.print("▶생일 : ");
-		String client_birth = reInput(scn);
+		String client_birth = reInput();
 		System.out.print("▶주소 : ");
-		String client_address = reInput(scn);
+		String client_address = reInput();
 		System.out.print("▶전화번호 : ");
-		String client_number = reInput(scn);
+		String client_number = reInput();
 
 		UserDTO dto = new UserDTO(client_id, client_password, client_name, client_birth, client_address, client_number,
 				0, 0);
@@ -65,9 +65,9 @@ public class UserProc {
 		Scanner scn = new Scanner(System.in);
 
 		System.out.print("▶아이디 : ");
-		String client_id = reInput(scn);
+		String client_id = reInput();
 		System.out.print("▶비밀번호 : ");
-		String client_password = reInput(scn);
+		String client_password = reInput();
 		boolean r = dao.loginUser(client_id, client_password);
 		
 		System.out.println(client_id +" "+ client_password);
@@ -172,8 +172,8 @@ public class UserProc {
 	}
 
 	// 공백입력시 재입력
-	public String reInput(Scanner scn) {
-
+	public String reInput() {
+		Scanner scn = new Scanner(System.in);
 		String str = "";
 		while (true) {
 			str = scn.nextLine();

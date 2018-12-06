@@ -31,20 +31,25 @@ public class PaymentProc {
 	public void insertPayment(String c_id) {
 		Scanner scn = new Scanner(System.in);
 		int p_no = showTicketingList_for_pay(c_id);
-		int ticket_no = dao.getPayment(p_no).getTicket_no();
-		int price = payment_process(ticket_no);
-		String pay_option = pay_option(price);
-		int isPayed = 1;
-		PaymentDTO dto = new PaymentDTO(p_no, ticket_no, price, pay_option, isPayed);
-		TicketingDAO t_dao = new TicketingDAO();
-		TicketingDTO t_dto = t_dao.getTicketing(ticket_no);
-		boolean r = dao.updatePayment(dto, p_no, using_point, t_dto.getPeople());
 
-		if (r) {
-			System.out.println("티켓 구매가 정상적으로 완료되었습니다.");
-			dao.addPurchased(c_id, ticket_no);
+		if (p_no != 0) {
+			int ticket_no = dao.getPayment(p_no).getTicket_no();
+			int price = payment_process(ticket_no);
+			String pay_option = pay_option(price);
+			int isPayed = 1;
+			PaymentDTO dto = new PaymentDTO(p_no, ticket_no, price, pay_option, isPayed);
+			TicketingDAO t_dao = new TicketingDAO();
+			TicketingDTO t_dto = t_dao.getTicketing(ticket_no);
+			boolean r = dao.updatePayment(dto, p_no, using_point, t_dto.getPeople());
+
+			if (r) {
+				System.out.println("티켓 구매가 정상적으로 완료되었습니다.");
+				dao.addPurchased(c_id, ticket_no);
+			} else {
+				System.out.println("티켓 구매가 정상적으로 이루지지 않았습니다.");
+			}
 		} else {
-			System.out.println("티켓 구매가 정상적으로 이루지지 않았습니다.");
+			System.out.println("구매할 내역이 존재하지 않습니다.");
 		}
 	}
 
@@ -61,7 +66,7 @@ public class PaymentProc {
 
 		Scanner scn = new Scanner(System.in);
 
-		System.out.println("결제 가격은 " + people + "명이므로" + "10000원 * " + people + "명 = 총 " + price + "원입니다.");
+		System.out.println("결제 가격은 " + people + "명 * 10000원으로  총  = " + price + "원입니다.");
 
 		if (point < 1000) {
 			System.out.println("회원님의 포인트 : " + point + " (포인트 사용은 1000 포인트 이상일 경우 사용이 가능합니다.)");
@@ -78,8 +83,6 @@ public class PaymentProc {
 					using_point = scn.nextInt();
 					if (using_point > point || using_point > price) {
 						System.out.println("입력하신 포인트가 보유하고 있는 포인트보다 크거나 결제 가격보다 큽니다. 다시 입력해 주세요.");
-					} else if (using_point < 1000) {
-						System.out.println("포인트는 1000 포인트 이상만 사용할 수 있습니다.");
 					} else {
 						final_price = dao.getFinal_price(ticket_no, using_point);
 						System.out.println("총 가격은 10000 * " + people + "원 - " + using_point + " 포인트이므로 결제해야 할 가격은 "
@@ -190,17 +193,19 @@ public class PaymentProc {
 
 		System.out.println("                             Payment List");
 		System.out.println("============================================================================");
-		if (list != null && list.size() > 0) {
+
+		if (list != null && list.size() > 0 && new PaymentDTO().getIsPayed() != 1) {
 			System.out.println("reg.No\t  결제 번호 \t\t예매 번호\t\t결제 가격\t\t결제 방법\t\t결제 여부");
 			System.out.println("============================================================================");
 
 			for (PaymentDTO dto : list) {
-				if (dto.getIsPayed() != 1) {
-					System.out.println("\t" + dto.getPayment_no() + "\t\t" + dto.getTicket_no() + "\t\t"
-							+ dto.getPrice() + "\t\t" + dto.getPay_option() + "\t\t" + dto.getIsPayed());
-
-				}
+				System.out.println("\t" + dto.getPayment_no() + "\t\t" + dto.getTicket_no() + "\t\t" + dto.getPrice()
+						+ "\t\t" + dto.getPay_option() + "\t\t" + dto.getIsPayed());
 			}
+
+			System.out.println(
+					"====================================================================총 " + list.size() + "개=\n");
+
 			while (true) {
 				System.out.print("구매할 결제 번호를 입력해 주세요. : ");
 				int p_no = scn.nextInt();
@@ -208,20 +213,20 @@ public class PaymentProc {
 				for (PaymentDTO dto : list) {
 					if (p_no == dto.getPayment_no()) {
 						return p_no;
+					} else {
+						System.out.println("입력하신 결제 번호가 존재하지 않습니다.");
 					}
 				}
-				System.out.println("입력한 결제 번호가 존재하지 않습니다.");
 			}
 		} else {
-			System.out.println("저장된 데이터가 없습니다. ");
+			System.out.println("결제할 데이터가 없습니다. ");
+			System.out.println("====================================================================총 " + "0개==\n");
+			return 0;
 		}
-		System.out.println("====================================================================총 "
-				+ ((list == null) ? "0" : list.size()) + "개=\n");
-		return -1;
 	}
 
-	public String reInput(Scanner scn) {
-
+	public String reInput() {
+		Scanner scn = new Scanner(System.in);
 		String str = "";
 		while (true) {
 			str = scn.nextLine();

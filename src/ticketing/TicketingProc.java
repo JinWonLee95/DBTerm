@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import Auditorium.AuditoriumDAO;
 import Auditorium.AuditoriumDTO;
+import Auditorium.AuditoriumProc;
 import Payment.PaymentDAO;
 import Payment.PaymentDTO;
 import Time_table.Time_tableDAO;
@@ -39,34 +40,43 @@ public class TicketingProc {
 
 	TicketingDAO dao;
 	static Scanner scn = new Scanner(System.in);
+	AuditoriumProc ap = new AuditoriumProc();
 
 	public TicketingProc() {
 		dao = new TicketingDAO();
 	}
 
 	public void insertTicketing(String client_id) {
-
+		String selectAuditorium = "";
+		String selectTheater = "";
 		MovieProc mp = new MovieProc();
 
 		System.out.println("예매를 시작합니다.");
 		System.out.print("▶예매 가능한 영화 : ");
 		mp.showMovieList_for_user();
 		System.out.print("▶예매할 영화 이름 : ");
-		String m_name = reInput(scn);
+		String m_name = reInput();
 		if (showTicketingTheater(m_name)) {
 			System.out.print("▶ 선택할 영화관 : ");
-			String selectTheater = reInput(scn);
+			selectTheater = reInput();
 			if (showTicketingAuditorium(selectTheater, m_name)) {
-				System.out.print("▶ 선택할 상영관 : ");
-				String selectAuditorium = reInput(scn);
+				while (true) {
+					System.out.print("▶ 선택할 상영관 : ");
+					selectAuditorium = reInput();
+					if (confirmAuditorium(selectTheater, m_name, selectAuditorium) == true) {
+						break;
+					} else {
+						System.out.println("이 상영관은 존재하지 않습니다.");
+					}
+				}
 				showTicketingDate(selectAuditorium);
 				System.out.println("▶ 날짜를 선택하시오.");
-				System.out.print("▶ 년도를 입력하시오. : ");
-				String year = reInput(scn);
-				System.out.print("▶ 월을 입력하시오. : ");
-				String month = reInput(scn);
-				System.out.print("▶ 일을 입력하시오. : ");
-				String day = reInput(scn);
+				System.out.print("▶ 년도를 입력하시오.(YYYY) : ");
+				String year = reInput();
+				System.out.print("▶ 월을 입력하시오.(MM) : ");
+				String month = reInput();
+				System.out.print("▶ 일을 입력하시오.(dd) : ");
+				String day = reInput();
 				String date = year + "-" + month + "-" + day;
 
 				if (confirm_Date(selectAuditorium, date)) {
@@ -127,7 +137,7 @@ public class TicketingProc {
 		System.out.println("====================================================================총 "
 				+ ((list == null) ? "0" : list.size()) + "개=\n");
 		if (list.size() == 0) {
-			System.out.println("해당 이름의 영화를 상영하는 영화관이 존재하지 않습니다.");
+			System.out.println("해당하는 영화를 상영하는 영화관이 존재하지 않습니다.");
 			return false;
 		} else {
 			return true;
@@ -155,11 +165,25 @@ public class TicketingProc {
 				+ ((list == null) ? "0" : list.size()) + "개=\n");
 
 		if (list.size() == 0) {
-			System.out.println("해당 영화를 상영하는 상영관이 존재하지 않습니다.");
+			System.out.println("해당 이름의 영화관이 없거나, 해당 영화를 상영하는 상영관이 존재하지 않습니다.");
 			return false;
 		} else {
 			return true;
 		}
+	}
+
+	public boolean confirmAuditorium(String selectTheater, String selectMovie, String a_name) {
+		List<AuditoriumDTO> list = dao.getTicketingAuditorium(selectTheater, selectMovie);
+
+		if (list != null && list.size() > 0) {
+			for (AuditoriumDTO dto : list) {
+				if (dto.getAuditorium_name().equals(a_name)) {
+					return true;
+				}
+			}
+
+		}
+		return false;
 	}
 
 	public void showTicketingDate(String selectedAuditorium) {
@@ -206,7 +230,7 @@ public class TicketingProc {
 		}
 		while (true) {
 			System.out.print("▶ 선택할 상영 시간 : ");
-			String show_time = reInput(scn);
+			String show_time = reInput();
 			System.out.print("▶ 예매할 인원 수 : ");
 			int num = scn.nextInt();
 
@@ -285,8 +309,8 @@ public class TicketingProc {
 	}
 
 	// 공백입력시 재입력
-	public String reInput(Scanner scn) {
-
+	public String reInput() {
+		Scanner scn = new Scanner(System.in);
 		String str = "";
 		while (true) {
 			str = scn.nextLine();
@@ -307,7 +331,7 @@ public class TicketingProc {
 		System.out.println("============================================================================");
 		System.out.println("예매 회원\t\t예매번호\t\t영화id\t\t영화관\t\t관람인원");
 		System.out.println("============================================================================");
-		
+
 		dao.getTicketInfo(id);
 		System.out.println("============================================================================");
 
@@ -315,17 +339,29 @@ public class TicketingProc {
 
 	// 티켓 발권
 	public void getPrintTicket(String id) {
-		System.out.print("발권 받으실 예매 번호를 입력하세요: ");
-		int ticket_no = scn.nextInt();
+		printTicket(id);
+		
+		if (dao.regiCount == 0) {
+			System.out.println("***발권 가능한 예매 내용이 없습니다.***");
+		} else {
+			System.out.print("발권 받으실 예매 번호를 입력하세요: ");
+			int ticket_no = Integer.parseInt(reInput());
 
-		dao.getPrintTicket(ticket_no);
+			dao.getPrintTicket(ticket_no);
+		}
 	}
 
-	public void cancelArrangement() {
-		System.out.println("예매 취소할 예매번호를 입력해주세요: ");
-		int ticket_No = scn.nextInt();
+	public void cancelArrangement(String id) {
+		printTicket(id);
+		
+		if (dao.regiCount == 0) {
+			System.out.println("취소할 예매 내역이 없습니다.");
+		} else {
+			System.out.println("예매 취소할 예매번호를 입력해주세요: ");
+			int ticket_No = scn.nextInt();
 
-		dao.deleteArrange(ticket_No);
+			dao.deleteArrange(ticket_No);
+		}
 	}
 
 }

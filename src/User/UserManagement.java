@@ -152,7 +152,8 @@ public class UserManagement {
 			case 2:
 				boolean r = mm.deleteUser();
 				if (r == true) {
-					System.exit(0);
+					run_User = false;
+					break;
 				} else {
 					break;
 				}
@@ -169,11 +170,9 @@ public class UserManagement {
 				tp.printTicket(logIn_id);
 				break;
 			case 7:
-				tp.printTicket(logIn_id);
-				tp.cancelArrangement();
+				tp.cancelArrangement(logIn_id);
 				break;
 			case 8:
-				tp.printTicket(logIn_id);
 				tp.getPrintTicket(logIn_id);
 				break;
 			case 9:

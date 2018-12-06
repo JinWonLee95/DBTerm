@@ -27,39 +27,6 @@ public class ClientDAO {
 
 	}
 
-	//영화 등록하기
-	public boolean insertClient(ClientDTO dto) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		boolean result = false;
-		
-		try {
-			conn = getConnection();
-
-			String sql = "insert into client VALUES (?,?,?,?,?,?,?,?)";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, dto.getClient_id());
-			pstmt.setString(2, dto.getClient_password());
-			pstmt.setString(3, dto.getClient_name());
-			pstmt.setString(4, dto.getClient_birth());
-			pstmt.setString(5, dto.getClient_address());
-			pstmt.setString(6, dto.getClient_number());
-			pstmt.setString(7, Integer.toString(dto.getClient_point()));
-			pstmt.setString(8, Integer.toString(dto.getClient_purchase_count()));
-			int r = pstmt.executeUpdate();
-			if (r > 0){
-				result = true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-	         if(pstmt != null) try{pstmt.close();}catch(SQLException sqle){}
-	         if(conn != null) try{conn.close();}catch(SQLException sqle){}
-		}
-		return result;
-	}
-
-	//영화이름에 해당하는 영화 정보 보기
 	public ClientDTO getClient(String id) {
 		ClientDTO dto = null;
 		Connection conn = null;
@@ -100,7 +67,6 @@ public class ClientDAO {
 	}
 
 
-	//저장된 회원 목록 보기
 	public List<ClientDTO> getClientList() {
 		List<ClientDTO> list = new ArrayList<ClientDTO>();
 		Connection conn = null;
@@ -138,65 +104,6 @@ public class ClientDAO {
 	      }
 
 		return list;
-	}
-
-
-	//회원 수정
-	public boolean updateClient(ClientDTO dto, String id) {
-		Connection conn = null;
-	    PreparedStatement pstmt = null;
-		boolean result = false;
-		
-		try {
-			conn = getConnection();
-
-			String sql = "UPDATE client SET client_id = ?, client_password = ?, client_name = ?, client_birth = ?, client_address = ?, client_number = ?, client_point = ?, client_purchase_count = ? WHERE client_id = ?";
-			pstmt = conn.prepareStatement(sql);
-
-			pstmt.setString(1, dto.getClient_id());
-			pstmt.setString(2, dto.getClient_password());
-			pstmt.setString(3, dto.getClient_name());
-			pstmt.setString(4, dto.getClient_birth());
-			pstmt.setString(5, dto.getClient_address());
-			pstmt.setString(6, dto.getClient_number());
-			pstmt.setString(7, Integer.toString(dto.getClient_point()));
-			pstmt.setString(8, Integer.toString(dto.getClient_purchase_count()));
-			pstmt.setString(9, id);
-			int r = pstmt.executeUpdate();
-			if (r > 0){
-				result = true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			 if(pstmt != null) try{pstmt.close();}catch(SQLException sqle){}
-	         if(conn != null) try{conn.close();}catch(SQLException sqle){}
-		}
-		return result;
-	}
-
-	//회원 삭제
-	public boolean deleteClient(String id) {
-		Connection conn = null;
-	    PreparedStatement pstmt = null;
-		boolean result = false;
-		try {
-			conn = getConnection();
-
-			String sql = "DELETE FROM client WHERE client_id = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, id);
-			int r = pstmt.executeUpdate();
-			if (r > 0){
-				result = true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if(pstmt != null) try{pstmt.close();}catch(SQLException sqle){}
-	         if(conn != null) try{conn.close();}catch(SQLException sqle){}
-		}
-		return result;
 	}
 	
 	//vip 선정 및 추가 결제 후 실행

@@ -55,22 +55,6 @@ public class UserDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
 		}
 
 		return result;
@@ -79,6 +63,7 @@ public class UserDAO {
 	public boolean signUpUser(UserDTO dto) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
+		PreparedStatement pstmt2 = null;
 		boolean result = false;
 
 		try {
@@ -86,34 +71,36 @@ public class UserDAO {
 				conn = getConnection();
 
 				String sql = "insert into client VALUES (?,?,?,?,?,?,?,?)";
+				String sql2 = "select exists (select * from client where client_id = ?) as success";
 				pstmt = conn.prepareStatement(sql);
+				pstmt2 = conn.prepareStatement(sql2);
 				pstmt.setString(1, dto.getUser_id());
 				pstmt.setString(2, dto.getUser_password());
 				pstmt.setString(3, dto.getUser_name());
-				pstmt.setString(4, dto.getUser_birth());
-				pstmt.setString(5, dto.getUser_address());
-				pstmt.setString(6, dto.getUser_number());
+				pstmt.setString(6, dto.getUser_birth());
+				pstmt.setString(4, dto.getUser_address());
+				pstmt.setString(5, dto.getUser_number());
 				pstmt.setString(7, Integer.toString(dto.getUser_point()));
 				pstmt.setString(8, Integer.toString(dto.getUser_purchase_count()));
-				int r = pstmt.executeUpdate();
-				if (r > 0) {
-					result = true;
+
+				pstmt2.setString(1, dto.getUser_id());
+				ResultSet rs = pstmt2.executeQuery();
+				
+				rs.next();		
+				if(rs.getInt(1) == 1){
+					System.out.println(dto.getUser_id() + "은 존재하는 아이디입니다.");
+				}else{
+					int r = pstmt.executeUpdate();
+					if (r > 0) {
+						result = true;
+					}	
 				}
+				
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException sqle) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException sqle) {
-				}
-		}
+		} 
 		return result;
 	}
 
@@ -221,22 +208,6 @@ public class UserDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (r != null)
-				try {
-					r.close();
-				} catch (SQLException ex) {
-				}
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException ex) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException ex) {
-				}
 		}
 		return dto;
 	}
@@ -245,14 +216,17 @@ public class UserDAO {
 	public boolean updateUser(UserDTO dto, String id) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
+		PreparedStatement pstmt2 = null;
 		boolean result = false;
 
 		try {
 			conn = getConnection();
 
 			String sql = "UPDATE client SET client_id = ?, client_password = ?, client_name = ?, client_birth = ?, client_address = ?, client_number = ?, client_point = ?, client_purchase_count = ? WHERE client_id = ?";
+			String sql2 = "select exists (select * from theater where client_id = ?) as success";
 			pstmt = conn.prepareStatement(sql);
-
+			pstmt2 = conn.prepareStatement(sql2);
+			
 			pstmt.setString(1, dto.getUser_id());
 			pstmt.setString(2, dto.getUser_password());
 			pstmt.setString(3, dto.getUser_name());
@@ -262,23 +236,22 @@ public class UserDAO {
 			pstmt.setString(7, Integer.toString(dto.getUser_point()));
 			pstmt.setString(8, Integer.toString(dto.getUser_purchase_count()));
 			pstmt.setString(9, id);
-			int r = pstmt.executeUpdate();
-			if (r > 0) {
-				result = true;
+			
+			pstmt2.setString(1, dto.getUser_id());
+			ResultSet rs = pstmt2.executeQuery();
+			
+			rs.next();		
+			if(rs.getInt(1) == 1){
+				System.out.println(dto.getUser_id() + "은 존재하는 아이디입니다.");
+			}else{
+				int r = pstmt.executeUpdate();
+				if (r > 0) {
+					result = true;
+				}	
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (pstmt != null)
-				try {
-					pstmt.close();
-				} catch (SQLException sqle) {
-				}
-			if (conn != null)
-				try {
-					conn.close();
-				} catch (SQLException sqle) {
-				}
 		}
 		return result;
 	}

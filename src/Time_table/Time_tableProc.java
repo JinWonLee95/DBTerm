@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import Auditorium.AuditoriumDTO;
+
 public class Time_tableProc {
 
 	Time_tableDAO dao;
@@ -22,14 +24,22 @@ public class Time_tableProc {
 
 	// 영화관 등록 처리
 	public void insertTime_table(String a_name, String m_id) {
+		String time = "";
 		Scanner scn = new Scanner(System.in);
-		System.out.println("상영 시간을 입력해주세요.");
-		System.out.print("▶시간 : ");
-		String time = reInput(scn);
-		System.out.print("▶상영 시작 날짜 : ");
-		String start_date = reInput(scn);
-		System.out.print("▶상영 종료 날짜 : ");
-		String end_date = reInput(scn);
+		while(true){
+			System.out.println("상영 시작 시간을 입력해주세요.");
+			System.out.print("▶시간(HHmm) : ");
+			time = reInput();
+			if(confirmTime_tableListByAuditorium(time, a_name) == true){
+				System.out.println("존재하는 상영 시작 시간입니다.");
+			}else{
+				break;
+			}
+		}
+		System.out.print("▶상영 시작 날짜 (YYYY-mm-dd): ");
+		String start_date = reInput();
+		System.out.print("▶상영 종료 날짜 (YYYY-mm-dd) : ");
+		String end_date = reInput();
 		Time_tableDTO dto = new Time_tableDTO(a_name, time, m_id, start_date, end_date);
 		boolean r = dao.insertTime_table(dto);
 
@@ -39,8 +49,17 @@ public class Time_tableProc {
 				System.out.println("상영 시간을 추가하시겠습니까?(Y/N)");
 				String input = scn.nextLine();
 				if (input.equalsIgnoreCase("y")) {
-					System.out.print("▶시간 : ");
-					String time2 = reInput(scn);
+					String time2;
+					while(true){
+						System.out.println("상영 시작 시간을 입력해주세요.");
+						System.out.print("▶시간(HHmm) : ");
+						time2 = reInput();
+						if(confirmTime_tableListByAuditorium(time2, a_name) == true){
+							System.out.println("존재하는 상영 시작 시간입니다.");
+						}else{
+							break;
+						}
+					}
 					Time_tableDTO dto2 = new Time_tableDTO(a_name, time2, m_id, start_date, end_date);
 					boolean r2 = dao.insertTime_table(dto2);
 
@@ -90,9 +109,22 @@ public class Time_tableProc {
 				+ ((list == null) ? "0" : list.size()) + "개=\n");
 	}
 
-	// 공백입력시 재입력
-	public String reInput(Scanner scn) {
+	public boolean confirmTime_tableListByAuditorium(String t_name, String a_name){
+		List<Time_tableDTO> list = dao.getTime_tableListByAuditorium(a_name);
+		if (list != null && list.size() > 0) {
+			for (Time_tableDTO dto : list) {
+				if(dto.getShow_time().equals(t_name)){
+					return true;
+				}
+			}
 
+		}
+		return false;
+	}
+	
+	// 공백입력시 재입력
+	public String reInput() {
+		Scanner scn = new Scanner(System.in);
 		String str = "";
 		while (true) {
 			str = scn.nextLine();

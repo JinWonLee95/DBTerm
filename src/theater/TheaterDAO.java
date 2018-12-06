@@ -4,11 +4,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import movie.MovieDTO;
+
 public class TheaterDAO {
 
 	private static TheaterDAO instance = new TheaterDAO();
 	Connection conn = null;
 	PreparedStatement pstmt = null;
+	PreparedStatement pstmt2 = null;
 
 	public static TheaterDAO getInstance() {
 		return instance;
@@ -37,14 +40,25 @@ public class TheaterDAO {
 		try {
 			conn = getConnection();
 
-			String sql = "insert into theater VALUES (?,?,?)";
+			String sql = "insert into theater VALUES (?,?,?);";
+			String sql2 = "select exists (select * from theater where theater_name = ?) as success";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, dto.getTheater_name());
 			pstmt.setString(2, dto.getTheater_address());
 			pstmt.setString(3, dto.getTheater_number());
-			int r = pstmt.executeUpdate();
-			if (r > 0) {
-				result = true;
+
+			pstmt2 = conn.prepareStatement(sql2);
+			pstmt2.setString(1, dto.getTheater_name());
+			ResultSet rs = pstmt2.executeQuery();
+
+			rs.next();
+			if (rs.getInt(1) == 1) {
+				System.out.println(dto.getTheater_name() + "은 존재하는 영화관입니다.");
+			} else {
+				int r = pstmt.executeUpdate();
+				if (r > 0) {
+					result = true;
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -151,7 +165,7 @@ public class TheaterDAO {
 	}
 
 	// 영화관 수정
-	public boolean updateTheater(TheaterDTO dto, String t_name) {
+	public boolean updateTheater(TheaterDTO dto, String t_name, String name) {
 		boolean result = false;
 
 		try {
@@ -164,10 +178,27 @@ public class TheaterDAO {
 			pstmt.setString(2, dto.getTheater_address());
 			pstmt.setString(3, dto.getTheater_number());
 			pstmt.setString(4, t_name);
+
+			if (!t_name.equals(name)) {
+				String sql2 = "select exists (select * from theater where theater_name = ?) as success";
+				pstmt2 = conn.prepareStatement(sql2);
+				pstmt2.setString(1, dto.getTheater_name());
+				ResultSet rs = pstmt2.executeQuery();
+				rs.next();
+				if (rs.getInt(1) == 1) {
+					System.out.println(dto.getTheater_name() + "은 존재하는 영화관입니다.");
+				} else {
+					int r = pstmt.executeUpdate();
+					if (r > 0) {
+						result = true;
+					}
+				}
+			}
 			int r = pstmt.executeUpdate();
 			if (r > 0) {
 				result = true;
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -215,20 +246,27 @@ public class TheaterDAO {
 		return result;
 	}
 
-//	public int countAudi(String t_name) {
-//		ResultSet result;
-//		int count=0;
-//		try {
-//			conn = getConnection();
-//
-//			String sql = "SELECT count(auditorium_name) as result from auditorium where theater_name=? ";
-//			pstmt = conn.prepareStatement(sql);
-//			pstmt.setString(1, t_name);
-//			 result = pstmt.executeQuery();
-//			 count = result.getInt("result");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return count;
-//	}
+	public Boolean confirmTheater(String t_name) {
+		ResultSet r = null;
+
+		try {
+			conn = getConnection();
+
+			String sql = "select exists (select * from theater where theater_name = ?) as success";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, t_name);
+			r = pstmt.executeQuery();
+
+			r.next();
+			if (r.getInt(1) == 1) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

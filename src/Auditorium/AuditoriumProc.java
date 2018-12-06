@@ -32,7 +32,7 @@ public class AuditoriumProc {
 
 		System.out.println("상영관 정보를 입력해주세요.");
 		System.out.print("▶이름 : ");
-		String a_name = reInput(scn);
+		String a_name = reInput();
 		System.out.print("▶좌석 수 : ");
 		int seat = scn.nextInt();
 		a = a_name;
@@ -94,6 +94,21 @@ public class AuditoriumProc {
 		System.out.println("====================================================================총 "
 				+ ((list == null) ? "0" : list.size()) + "개=\n");
 	}
+	
+	public boolean confirmAuditoriumListByTheater(String t_name, String a_name){
+		List<AuditoriumDTO> list = dao.getAuditoriumListByTheater(t_name);
+		if (list != null && list.size() > 0) {
+			for (AuditoriumDTO dto : list) {
+				if(dto.getAuditorium_name().equals(a_name)){
+					return true;
+				}
+			}
+
+		} else {
+			System.out.println("저장된 데이터가 없습니다. ");
+		}
+		return false;
+	}
 
 	// 영화관 삭제
 	public void deleteAuditorium() {
@@ -124,9 +139,10 @@ public class AuditoriumProc {
 	}
 
 	// 공백입력시 재입력
-	public String reInput(Scanner scn) {
+	public String reInput() {
 
 		String str;
+		Scanner scn = new Scanner(System.in);
 		while (true) {
 			str = scn.nextLine();
 			if (!(str == null || str.trim().equals(""))) {
